@@ -25,18 +25,11 @@ function staticLoadPlaces(latitude, longitude) {
                 lat: latitude,
                 lng: longitude,
             },
+            position: { x: 0, y: 2, z: -5 }
         },
     ];
 }
 
-function calculatePosition(latitude, longitude, distance) {
-    const earthRadius = 6378137; // Earth's radius in meters
-    const dLat = (distance / earthRadius) * (180 / Math.PI);
-    const newLat = latitude + dLat;
-    const dLng = (distance / earthRadius) * (180 / Math.PI) / Math.cos(latitude * Math.PI / 180);
-    const newLng = longitude + dLng;
-    return { lat: newLat, lng: newLng };
-}
 
 var models = [
     {
@@ -79,16 +72,15 @@ var setModel = function (model, entity) {
     div.innerText = model.info;
 };
 
-function renderPlaces(places, latitude, longitude) {
+function renderPlaces(places) {
     let scene = document.querySelector('a-scene');
 
     places.forEach((place) => {
+        let latitude = place.location.lat;
+        let longitude = place.location.lng;
+
         let model = document.createElement('a-entity');
-
-        const distanceInFrontOfUser = 10; // Adjust this distance as needed
-        const newPosition = calculatePosition(latitude, longitude, distanceInFrontOfUser);
-
-        model.setAttribute('gps-entity-place', `latitude: ${newPosition.lat}; longitude: ${newPosition.lng};`);
+        model.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
 
         setModel(models[modelIndex], model);
 
