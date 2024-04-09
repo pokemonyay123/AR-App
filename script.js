@@ -29,6 +29,15 @@ function staticLoadPlaces(latitude, longitude) {
     ];
 }
 
+function calculatePosition(latitude, longitude, distance) {
+    const earthRadius = 6378137; // Earth's radius in meters
+    const dLat = (distance / earthRadius) * (180 / Math.PI);
+    const newLat = latitude + dLat;
+    const dLng = (distance / earthRadius) * (180 / Math.PI) / Math.cos(latitude * Math.PI / 180);
+    const newLng = longitude + dLng;
+    return { lat: newLat, lng: newLng };
+}
+
 var models = [
     {
         url: './assets/magnemite/scene.gltf',
@@ -70,15 +79,16 @@ var setModel = function (model, entity) {
     div.innerText = model.info;
 };
 
-function renderPlaces(places) {
+function renderPlaces(places, latitude, longitude) {
     let scene = document.querySelector('a-scene');
 
     places.forEach((place) => {
-        let latitude = place.location.lat;
-        let longitude = place.location.lng;
-
         let model = document.createElement('a-entity');
-        model.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
+
+        const distanceInFrontOfUser = 10; // Adjust this distance as needed
+        const newPosition = calculatePosition(latitude, longitude, distanceInFrontOfUser);
+
+        model.setAttribute('gps-entity-place', `latitude: ${newPosition.lat}; longitude: ${newPosition.lng};`);
 
         setModel(models[modelIndex], model);
 
