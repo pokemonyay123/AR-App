@@ -8,11 +8,13 @@ window.onload = () => {
             const longitude = position.coords.longitude;
             const places = staticLoadPlaces(latitude, longitude);
             renderPlaces(places);
-            console.log(longitude, latitude)
+            
         });
     } else {
         console.error('Geolocation is not supported by this browser.');
     }
+
+    console.log(longitude, latitude)
 };
 
 function staticLoadPlaces(latitude, longitude) {
