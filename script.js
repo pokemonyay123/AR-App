@@ -1,3 +1,4 @@
+
 window.onload = () => {
     const button = document.querySelector('button[data-action="change"]');
     button.innerText = '﹖';
@@ -11,8 +12,8 @@ function staticLoadPlaces() {
         {
             name: 'Pokèmon',
             location: {
-                lat: 44.669590,
-                lng: -63.613831,
+                lat: 44.66951911983979,
+                lng: -63.614668134491914,
             },
         },
     ];
@@ -59,71 +60,27 @@ var setModel = function (model, entity) {
     div.innerText = model.info;
 };
 
-// getting places from APIs
-function loadPlaces(position) {
-    const params = {
-        radius: 300,    // search places not farther than this value (in meters)
-        clientId: '<YOUR-CLIENT-ID>',
-        clientSecret: 'YOUR-CLIENT-SECRET',
-        version: '20300101',    // foursquare versioning, required but unuseful for this demo
-    };
+function renderPlaces(places) {
+    let scene = document.querySelector('a-scene');
 
-    // CORS Proxy to avoid CORS problems
-    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    places.forEach((place) => {
+        let latitude = place.location.lat;
+        let longitude = place.location.lng;
 
-    // Foursquare API (limit param: number of maximum places to fetch)
-    const endpoint = `${corsProxy}https://api.foursquare.com/v2/venues/search?intent=checkin
-        &ll=${position.latitude},${position.longitude}
-        &radius=${params.radius}
-        &client_id=${params.clientId}
-        &client_secret=${params.clientSecret}
-        &limit=30 
-        &v=${params.version}`;
-    return fetch(endpoint)
-        .then((res) => {
-            return res.json()
-                .then((resp) => {
-                    return resp.response.venues;
-                })
-        })
-        .catch((err) => {
-            console.error('Error with places API', err);
-        })
-};
+        let model = document.createElement('a-entity');
+        model.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
 
+        setModel(models[modelIndex], model);
 
-window.onload = () => {
-    const scene = document.querySelector('a-scene');
+        model.setAttribute('animation-mixer', '');
 
-    // first get current user location
-    return navigator.geolocation.getCurrentPosition(function (position) {
+        document.querySelector('button[data-action="change"]').addEventListener('click', function () {
+            var entity = document.querySelector('[gps-entity-place]');
+            modelIndex++;
+            var newIndex = modelIndex % models.length;
+            setModel(models[newIndex], entity);
+        });
 
-        // than use it to load from remote APIs some places nearby
-        loadPlaces(position.coords)
-            .then((places) => {
-                places.forEach((place) => {
-                    const latitude = place.location.lat;
-                    const longitude = place.location.lng;
-
-                    // add place name
-                    const placeText = document.createElement('a-link');
-                    placeText.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
-                    placeText.setAttribute('title', place.name);
-                    placeText.setAttribute('scale', '15 15 15');
-                    
-                    placeText.addEventListener('loaded', () => {
-                        window.dispatchEvent(new CustomEvent('gps-entity-place-loaded'))
-                    });
-
-                    scene.appendChild(placeText);
-                });
-            })
-    },
-        (err) => console.error('Error in retrieving position', err),
-        {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 27000,
-        }
-    );
-};
+        scene.appendChild(model);
+    });
+}
