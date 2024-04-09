@@ -2,57 +2,29 @@ window.onload = () => {
     const button = document.querySelector('button[data-action="change"]');
     button.innerText = '﹖';
 
-    // Get user's location dynamically
-    getUserLocation()
-        .then((position) => {
-            // Load places based on user's location
-            let places = loadPlaces(position.coords);
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const places = staticLoadPlaces(latitude, longitude);
             renderPlaces(places);
-        })
-        .catch((error) => {
-            console.error('Error getting user location:', error);
+            console.log(longitude, latitude)
         });
+    } else {
+        console.error('Geolocation is not supported by this browser.');
+    }
 };
 
-function getUserLocation() {
-    return new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                resolve(position);
+function staticLoadPlaces(latitude, longitude) {
+    return [
+        {
+            name: 'Pokèmon',
+            location: {
+                lat: latitude,
+                lng: longitude,
             },
-            (error) => {
-                reject(error);
-            }
-        );
-    });
-}
-
-function loadPlaces(position) {
-    const params = {
-        radius: 300,    // search places not farther than this value (in meters)
-        clientId: 'SNM4OKQAKERQA3SSDPNLQPLHPH0I5XMHA3IXNF4DUDK01L0I',
-        clientSecret: '0TEF0OZ54RSQANZFOJJ5WMVU3OTW4HEQJ3J13EMGKZJJXWL0',
-        version: '20300101',    // foursquare versioning, required but unuseful for this demo
-    };
-
-    // CORS Proxy to avoid CORS problems
-    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-
-    // Foursquare API (limit param: number of maximum places to fetch)
-    const endpoint = `${corsProxy}https://api.foursquare.com/v2/venues/search?intent=checkin
-        &ll=${position.latitude},${position.longitude}
-        &radius=${params.radius}
-        &client_id=${params.clientId}
-        &client_secret=${params.clientSecret}
-        &limit=30 
-        &v=${params.version}`;
-
-    return fetch(endpoint)
-        .then((res) => res.json())
-        .then((data) => data.response.venues)
-        .catch((err) => {
-            console.error('Error with places API', err);
-        });
+        },
+    ];
 }
 
 var models = [
