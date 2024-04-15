@@ -2,11 +2,13 @@ window.onload = () => {
     const button = document.querySelector('button[data-action="change"]');
     button.innerText = '﹖';
 
+    // get user location from their browser
     if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(function (position) {
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
             const places = staticLoadPlaces(latitude, longitude);
+            //call render places function with the users geo location
             renderPlaces(places);
             
         });
@@ -17,6 +19,7 @@ window.onload = () => {
     console.log(longitude, latitude)
 };
 
+//load the pokemon into users location with their lat and long
 function staticLoadPlaces(latitude, longitude) {
     return [
         {
@@ -31,6 +34,7 @@ function staticLoadPlaces(latitude, longitude) {
 }
 
 
+// scaling the models
 var models = [
     {
         url: './assets/magnemite/scene.gltf',
@@ -52,6 +56,7 @@ var models = [
     },
 ];
 
+// takes in the model, if there is scale rotation and position then set it.
 var modelIndex = 0;
 var setModel = function (model, entity) {
     if (model.scale) {
@@ -66,8 +71,11 @@ var setModel = function (model, entity) {
         entity.setAttribute('position', model.position);
     }
 
+
+    // model url
     entity.setAttribute('gltf-model', model.url);
 
+    //set the insutrctions div with the models info
     const div = document.querySelector('.instructions');
     div.innerText = model.info;
 };
@@ -79,6 +87,7 @@ function renderPlaces(places) {
         let latitude = place.location.lat;
         let longitude = place.location.lng;
 
+        //set model entity to the users lat and long
         let model = document.createElement('a-entity');
         model.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
 
@@ -86,6 +95,7 @@ function renderPlaces(places) {
 
         model.setAttribute('animation-mixer', '');
 
+        // set change button, changes model on click
         document.querySelector('button[data-action="change"]').addEventListener('click', function () {
             var entity = document.querySelector('[gps-entity-place]');
             modelIndex++;
